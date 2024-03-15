@@ -1,0 +1,43 @@
+curl --request POST \
+  --url http://localhost:8888/api/integration-smart-just/upload-result-file \
+  --header 'Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJmNDQwZWY3Mi01MmZmLTRhZjItYTU0OC01ZGNmMDczMDEwMDAiLCJpYXQiOjE3MDg5NjkxMzUsImV4cCI6MTcwOTE1MTEzNSwicm9sZXMiOnsiaWQiOjQsInJvbGVOYW1lIjoiUk9MRV9BRE1JTiIsImF1dGhvcml0eSI6IlJPTEVfQURNSU4ifX0.VDl_pBy1Xr4URadcFqFN-3JPIo8rFwg8h5rIo-edQkQryEiZGXcoHTd3V3Ee3KPjuIyXxUt1OyDHzSKEo698eA' \
+  --header 'Content-Type: multipart/form-data' \
+  --header 'User-Agent: insomnia/8.6.1' \
+  --cookie JSESSIONID=B7D0F12D948CBF25F17533DBC3C91FC5 \
+  --form file=@/Users/jafar.turaev/Downloads/test.docx
+
+
+  curl --request PUT \
+    --url http://localhost:8888/api/integration-smart-just/close/10 \
+    --header 'Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJmNDQwZWY3Mi01MmZmLTRhZjItYTU0OC01ZGNmMDczMDEwMDAiLCJpYXQiOjE3MDg5NjkxMzUsImV4cCI6MTcwOTE1MTEzNSwicm9sZXMiOnsiaWQiOjQsInJvbGVOYW1lIjoiUk9MRV9BRE1JTiIsImF1dGhvcml0eSI6IlJPTEVfQURNSU4ifX0.VDl_pBy1Xr4URadcFqFN-3JPIo8rFwg8h5rIo-edQkQryEiZGXcoHTd3V3Ee3KPjuIyXxUt1OyDHzSKEo698eA' \
+    --header 'Content-Type: application/json' \
+    --header 'User-Agent: insomnia/8.6.1' \
+    --cookie JSESSIONID=B7D0F12D948CBF25F17533DBC3C91FC5 \
+    --data '{
+  "confirm": true,
+  "file_id":627	,
+  "message":"test"
+  }'
+
+  curl --request PUT \
+    --url http://localhost:8888/api/integration-smart-just/confirm/30 \
+    --header 'Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJmNDQwZWY3Mi01MmZmLTRhZjItYTU0OC01ZGNmMDczMDEwMDAiLCJpYXQiOjE3MDg5NjkxMzUsImV4cCI6MTcwOTE1MTEzNSwicm9sZXMiOnsiaWQiOjQsInJvbGVOYW1lIjoiUk9MRV9BRE1JTiIsImF1dGhvcml0eSI6IlJPTEVfQURNSU4ifX0.VDl_pBy1Xr4URadcFqFN-3JPIo8rFwg8h5rIo-edQkQryEiZGXcoHTd3V3Ee3KPjuIyXxUt1OyDHzSKEo698eA' \
+    --header 'Content-Type: application/json' \
+    --header 'User-Agent: insomnia/8.6.1' \
+    --cookie JSESSIONID=B7D0F12D948CBF25F17533DBC3C91FC5 \
+    --data '{
+  "confirm": true
+  }'
+
+  curl --request POST \
+    --url http://localhost:8888/api/integration-smart-just/app-list \
+    --header 'Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJmNDQwZWY3Mi01MmZmLTRhZjItYTU0OC01ZGNmMDczMDEwMDAiLCJpYXQiOjE3MDg5NjkxMzUsImV4cCI6MTcwOTE1MTEzNSwicm9sZXMiOnsiaWQiOjQsInJvbGVOYW1lIjoiUk9MRV9BRE1JTiIsImF1dGhvcml0eSI6IlJPTEVfQURNSU4ifX0.VDl_pBy1Xr4URadcFqFN-3JPIo8rFwg8h5rIo-edQkQryEiZGXcoHTd3V3Ee3KPjuIyXxUt1OyDHzSKEo698eA' \
+    --header 'Content-Type: application/json' \
+    --header 'User-Agent: insomnia/8.6.1' \
+    --cookie JSESSIONID=B7D0F12D948CBF25F17533DBC3C91FC5 \
+    --data '{   "perPage": 10,   "page": 2,   "sort": {     "name": "createdAt",     "direction": "desc"   },   "search": [] }'
+
+    curl --request POST \
+      --url http://localhost:8888/api/integration-smart-just/get-token \
+      --header 'User-Agent: insomnia/8.6.1' \
+      --cookie JSESSIONID=B7D0F12D948CBF25F17533DBC3C91FC5
