@@ -29,11 +29,11 @@ public class FileStorageDTO implements Serializable {
     @NotNull
     private String uploadPath;
 
-//    @NotNull
-//    private FileStorageType fileType;
+    @NotNull
+    private FileStorageType fileType;
 
-//    @NotNull
-//    private FileStorageStatus status;
+    @NotNull
+    private FileStorageStatus status;
 
     @NotNull
     private String actualStartDateStr;

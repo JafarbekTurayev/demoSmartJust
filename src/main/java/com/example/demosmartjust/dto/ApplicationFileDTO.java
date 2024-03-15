@@ -24,6 +24,24 @@ public class ApplicationFileDTO implements Serializable {
     private String extension;
 
     private String hashId;
+    private String smartJustFileId;
+    private String fileType;
+
+    public String getFileType() {
+        return fileType;
+    }
+
+    public void setFileType(String fileType) {
+        this.fileType = fileType;
+    }
+
+    public String getSmartJustFileId() {
+        return smartJustFileId;
+    }
+
+    public void setSmartJustFileId(String smartJustFileId) {
+        this.smartJustFileId = smartJustFileId;
+    }
 
     public Long getId() {
         return id;

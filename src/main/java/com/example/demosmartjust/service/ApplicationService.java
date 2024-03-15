@@ -22,15 +22,23 @@ public class ApplicationService {
 
     private final ApplicationMapper applicationMapper;
     private final ApplicationRepository applicationRepository;
+    private final ApplicationFileService applicationFileService;
 
-    public ApplicationService(ApplicationMapper applicationMapper, ApplicationRepository applicationRepository) {
+    public ApplicationService(ApplicationMapper applicationMapper, ApplicationRepository applicationRepository, ApplicationFileService applicationFileService) {
         this.applicationMapper = applicationMapper;
         this.applicationRepository = applicationRepository;
+        this.applicationFileService = applicationFileService;
     }
 
     public ApplicationDTO create(ApplicationDTO applicationDTO) {
         log.debug("Request to save App : {}", applicationDTO);
         Application save = applicationRepository.save(applicationMapper.toEntity(applicationDTO));
+
+        if (applicationDTO.getFileStorageHashId()!=null){
+            applicationFileService.create(applicationDTO.getApplicationFileDTOList().get(0));
+            //TODO aapfileniyam save qilamiz shu yerda
+        }
+
         return applicationMapper.toDto(save);
     }
 

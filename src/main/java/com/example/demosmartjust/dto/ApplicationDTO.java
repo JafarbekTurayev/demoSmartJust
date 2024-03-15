@@ -35,7 +35,16 @@ public class ApplicationDTO {
     private String applicationStatus;
     private String fileId;
     private String resultFileId;
+    private String fileStorageHashId;
     private List<ApplicationFileDTO> applicationFileDTOList;
+
+    public String getFileStorageHashId() {
+        return fileStorageHashId;
+    }
+
+    public void setFileStorageHashId(String fileStorageHashId) {
+        this.fileStorageHashId = fileStorageHashId;
+    }
 
     public List<ApplicationFileDTO> getApplicationFileDTOList() {
         return applicationFileDTOList;

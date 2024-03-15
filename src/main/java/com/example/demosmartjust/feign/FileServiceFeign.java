@@ -3,7 +3,7 @@ package com.example.demosmartjust.feign;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-//@AuthorizedFeignClient(name = "${feign.name.smartoffice-file-service}")
+@AuthorizedFeignClient(name = "${feign.name.smartoffice-file-service}")
 public interface FileServiceFeign {
 
     @GetMapping(value = "/api/file-storages/hash/{hashId}")

@@ -4,18 +4,26 @@ import com.example.demosmartjust.dto.ApplicationDTO;
 import com.example.demosmartjust.dto.ApplicationFileDTO;
 import com.example.demosmartjust.entity.ApplicationFile;
 import com.example.demosmartjust.entity.ApplicationFileFilterParam;
+import com.example.demosmartjust.entity.ApplicationFileType;
 import com.example.demosmartjust.entity.ParamUtil;
 import com.example.demosmartjust.feign.FileServiceFeign;
 import com.example.demosmartjust.feign.FileStorageDTO;
+import com.example.demosmartjust.integration.SmartJustIntegrationService;
+import com.example.demosmartjust.integration.SmartJustUploadResponse;
 import com.example.demosmartjust.mapper.ApplicationFileMapper;
 import com.example.demosmartjust.repository.ApplicationFileRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -33,18 +41,19 @@ public class ApplicationFileService {
     private final ApplicationFileRepository applicationFileRepository;
 
     private final ApplicationFileMapper applicationFileMapper;
+    private final SmartJustIntegrationService smartJustIntegrationService;
+    private final FileServiceFeign fileServiceFeign;
 
-//    private final FileServiceFeign fileServiceFeign;
-//, FileServiceFeign fileServiceFeign
-    public ApplicationFileService(ApplicationFileRepository applicationFileRepository, ApplicationFileMapper applicationFileMapper) {
+    public ApplicationFileService(ApplicationFileRepository applicationFileRepository, ApplicationFileMapper applicationFileMapper, FileServiceFeign fileServiceFeign, SmartJustIntegrationService smartJustIntegrationService) {
         this.applicationFileRepository = applicationFileRepository;
         this.applicationFileMapper = applicationFileMapper;
-//        this.fileServiceFeign = fileServiceFeign;
+        this.fileServiceFeign = fileServiceFeign;
+        this.smartJustIntegrationService = smartJustIntegrationService;
     }
-
 
     public ApplicationFileDTO create(ApplicationFileDTO applicationFileDTO) {
         log.debug("Request to save ApplicationFile : {}", applicationFileDTO);
+        applicationFileDTO.setFileType(ApplicationFileType.MAIN.name());
         ApplicationFile applicationFile = applicationFileMapper.toEntity(applicationFileDTO);
         applicationFile = applicationFileRepository.save(applicationFile);
         return applicationFileMapper.toDto(applicationFile);
@@ -58,18 +67,18 @@ public class ApplicationFileService {
         return applicationFileMapper.toDto(save);
     }
 
-    public Optional<ApplicationFileDTO> partialUpdate(ApplicationFileDTO cooperationContractFileDTO) {
-        log.debug("Request to partially update ApplicationFile : {}", cooperationContractFileDTO);
+    public Optional<ApplicationFileDTO> partialUpdate(ApplicationFileDTO applicationFileDTO) {
+        log.debug("Request to partially update ApplicationFile : {}", applicationFileDTO);
 
         return applicationFileRepository
-            .findById(cooperationContractFileDTO.getId())
-            .map(existingCoopContractFile -> {
-                applicationFileMapper.partialUpdate(existingCoopContractFile, cooperationContractFileDTO);
+                .findById(applicationFileDTO.getId())
+                .map(existingAppFile -> {
+                    applicationFileMapper.partialUpdate(existingAppFile, applicationFileDTO);
 
-                return existingCoopContractFile;
-            })
-            .map(applicationFileRepository::save)
-            .map(applicationFileMapper::toDto);
+                    return existingAppFile;
+                })
+                .map(applicationFileRepository::save)
+                .map(applicationFileMapper::toDto);
     }
 
     @Transactional(readOnly = true)
@@ -129,13 +138,13 @@ public class ApplicationFileService {
             .stream()
             .map(applicationFile -> {
                 ApplicationFileDTO applicationFileDTO = applicationFileMapper.toDto(applicationFile);
-//                FileStorageDTO fileStorageDTO = fileServiceFeign.getOneByHash(applicationFileDTO.getFileStorageHashId());
-//                if (fileStorageDTO != null) {
-//                    applicationFileDTO.setName(fileStorageDTO.getName());
-//                    applicationFileDTO.setFileSize(fileStorageDTO.getFileSize());
-//                    applicationFileDTO.setExtension(fileStorageDTO.getExtension());
-//                    applicationFileDTO.setHashId(fileStorageDTO.getHashId());
-//                }
+                FileStorageDTO fileStorageDTO = fileServiceFeign.getOneByHash(applicationFileDTO.getFileStorageHashId());
+                if (fileStorageDTO != null) {
+                    applicationFileDTO.setName(fileStorageDTO.getName());
+                    applicationFileDTO.setFileSize(fileStorageDTO.getFileSize());
+                    applicationFileDTO.setExtension(fileStorageDTO.getExtension());
+                    applicationFileDTO.setHashId(fileStorageDTO.getHashId());
+                }
                 return applicationFileDTO;
             })
             .collect(Collectors.toList());

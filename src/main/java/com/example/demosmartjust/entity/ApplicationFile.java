@@ -2,6 +2,8 @@ package com.example.demosmartjust.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -30,6 +32,29 @@ public class ApplicationFile implements Serializable {
     @NotNull
     @Column(name = "file_storage_hash_id", nullable = false)
     private String fileStorageHashId;
+    @NotNull
+    @Column(name = "smart_just_file_id", nullable = false)
+    private String smartJustFileId;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type", nullable = false)
+    private ApplicationFileType type;
+
+    public ApplicationFileType getType() {
+        return type;
+    }
+
+    public void setType(ApplicationFileType type) {
+        this.type = type;
+    }
+
+    public String getSmartJustFileId() {
+        return smartJustFileId;
+    }
+
+    public void setSmartJustFileId(String smartJustFileId) {
+        this.smartJustFileId = smartJustFileId;
+    }
 
     @ManyToOne
     private Application application;
