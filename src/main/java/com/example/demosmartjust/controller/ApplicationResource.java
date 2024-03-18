@@ -1,13 +1,14 @@
 package com.example.demosmartjust.controller;
 
-import com.example.demosmartjust.dto.ApplicationDTO;
-import com.example.demosmartjust.entity.ApplicationFilterParam;
-import com.example.demosmartjust.repository.ApplicationRepository;
-import com.example.demosmartjust.service.ApplicationService;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
+
+import com.smartsoft.smartofficebackend.domain.integration.smartJust.ApplicationFilterParam;
+import com.smartsoft.smartofficebackend.repository.integration.smartJust.ApplicationRepository;
+import com.smartsoft.smartofficebackend.service.dto.integration.smartJust.ApplicationDTO;
+import com.smartsoft.smartofficebackend.service.integration.smartJust.ApplicationService;
+import com.smartsoft.smartofficebackend.web.rest.errors.BadRequestAlertException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springdoc.api.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,7 +23,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import tech.jhipster.web.util.HeaderUtil;
+import tech.jhipster.web.util.PaginationUtil;
+import tech.jhipster.web.util.ResponseUtil;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
@@ -120,7 +126,6 @@ public class ApplicationResource {
         Page<ApplicationDTO> page = applicationService.findAll(pageable);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
         return ResponseEntity.ok().headers(headers).body(page.getContent());
-        return ResponseEntity.ok().body(page.getContent());
     }
 
     @PostMapping("/application/paging")
@@ -134,12 +139,8 @@ public class ApplicationResource {
     @GetMapping("/application/{id}")
     public ResponseEntity<ApplicationDTO> getApp(@PathVariable Long id) {
         log.debug("REST request to get App : {}", id);
-        ApplicationDTO applicationDTO = applicationService.findOne(id);
-        if (applicationDTO != null) {
-            return ResponseEntity.ok().body(applicationDTO);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        Optional<ApplicationDTO> applicationDTO = applicationService.findOne(id);
+        return ResponseUtil.wrapOrNotFound(applicationDTO);
     }
 
 }

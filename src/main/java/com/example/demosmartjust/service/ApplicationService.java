@@ -1,11 +1,13 @@
 package com.example.demosmartjust.service;
 
-import com.example.demosmartjust.dto.ApplicationDTO;
-import com.example.demosmartjust.entity.Application;
-import com.example.demosmartjust.entity.ApplicationFilterParam;
-import com.example.demosmartjust.entity.ParamUtil;
-import com.example.demosmartjust.mapper.ApplicationMapper;
-import com.example.demosmartjust.repository.ApplicationRepository;
+
+import com.smartsoft.smartofficebackend.domain.integration.smartJust.Application;
+import com.smartsoft.smartofficebackend.domain.integration.smartJust.ApplicationFilterParam;
+import com.smartsoft.smartofficebackend.repository.integration.smartJust.ApplicationRepository;
+import com.smartsoft.smartofficebackend.service.dto.integration.smartJust.ApplicationDTO;
+import com.smartsoft.smartofficebackend.service.dto.integration.smartJust.ApplicationFileDTO;
+import com.smartsoft.smartofficebackend.service.mapper.ApplicationMapper;
+import com.smartsoft.smartofficebackend.service.util.ParamUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -13,6 +15,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -24,7 +28,7 @@ public class ApplicationService {
     private final ApplicationRepository applicationRepository;
     private final ApplicationFileService applicationFileService;
 
-    public ApplicationService(ApplicationMapper applicationMapper, ApplicationRepository applicationRepository, ApplicationFileService applicationFileService) {
+    public ApplicationService(ApplicationMapper applicationMapper, ApplicationRepository applicationRepository,ApplicationFileService applicationFileService) {
         this.applicationMapper = applicationMapper;
         this.applicationRepository = applicationRepository;
         this.applicationFileService = applicationFileService;
@@ -35,7 +39,7 @@ public class ApplicationService {
         Application save = applicationRepository.save(applicationMapper.toEntity(applicationDTO));
 
         if (applicationDTO.getFileStorageHashId()!=null){
-            applicationFileService.create(applicationDTO.getApplicationFileDTOList().get(0));
+            applicationFileService.create(applicationDTO.getApplicationFileList().get(0));
             //TODO aapfileniyam save qilamiz shu yerda
         }
 
@@ -65,9 +69,20 @@ public class ApplicationService {
     }
 
     @Transactional(readOnly = true)
-    public ApplicationDTO findOne(Long id) {
-        log.debug("Request to get App : {}", id);
-        return applicationRepository.findById(id).map(applicationMapper::toDto).orElse(new ApplicationDTO());
+    public Optional<ApplicationDTO> findOne(Long id) {
+        log.debug("Request to get Application : {}", id);
+        return applicationRepository
+            .findById(id)
+            .map(application -> {
+                ApplicationDTO applicationDTO = applicationMapper.toDto(application);
+                List<ApplicationFileDTO> allListByApplicationId = applicationFileService.findAllListByApplicationId(applicationDTO.getId());
+                if (allListByApplicationId.size() > 0) {
+                    applicationDTO.setApplicationFileList(allListByApplicationId);
+                } else {
+                    applicationDTO.setApplicationFileList(new ArrayList<>());
+                }
+                return applicationDTO;
+            });
     }
 
     @Transactional(readOnly = true)
@@ -85,7 +100,6 @@ public class ApplicationService {
                         filter.getInNumber()
                 ).map(application -> {
                     ApplicationDTO applicationDTO = applicationMapper.toDto(application);
-//                    ApplicationDTO res = fillCooperationDTO(application, applicationDTO);
                     return applicationDTO;
                 });
     }

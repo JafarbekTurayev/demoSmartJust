@@ -1,13 +1,14 @@
 package com.example.demosmartjust.controller;
 
-import com.example.demosmartjust.dto.ApplicationFileDTO;
-import com.example.demosmartjust.entity.ApplicationFileFilterParam;
-import com.example.demosmartjust.repository.ApplicationFileRepository;
-import com.example.demosmartjust.service.ApplicationFileService;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
+
+import com.smartsoft.smartofficebackend.domain.integration.smartJust.ApplicationFileFilterParam;
+import com.smartsoft.smartofficebackend.repository.integration.smartJust.ApplicationFileRepository;
+import com.smartsoft.smartofficebackend.service.dto.integration.smartJust.ApplicationFileDTO;
+import com.smartsoft.smartofficebackend.service.integration.smartJust.ApplicationFileService;
+import com.smartsoft.smartofficebackend.web.rest.errors.BadRequestAlertException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springdoc.api.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,7 +24,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import tech.jhipster.web.util.HeaderUtil;
+import tech.jhipster.web.util.PaginationUtil;
+import tech.jhipster.web.util.ResponseUtil;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;

@@ -1,7 +1,8 @@
 package com.example.demosmartjust.dto;
 
-import com.example.demosmartjust.integration.confirm.SmartJustName;
+
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.smartsoft.smartofficebackend.domain.integration.smartJust.SmartJustName;
 
 import java.time.LocalTime;
 import java.util.Date;
@@ -36,22 +37,14 @@ public class ApplicationDTO {
     private String fileId;
     private String resultFileId;
     private String fileStorageHashId;
-    private List<ApplicationFileDTO> applicationFileDTOList;
+    private List<ApplicationFileDTO> applicationFileList;
 
-    public String getFileStorageHashId() {
-        return fileStorageHashId;
+    public List<ApplicationFileDTO> getApplicationFileList() {
+        return applicationFileList;
     }
 
-    public void setFileStorageHashId(String fileStorageHashId) {
-        this.fileStorageHashId = fileStorageHashId;
-    }
-
-    public List<ApplicationFileDTO> getApplicationFileDTOList() {
-        return applicationFileDTOList;
-    }
-
-    public void setApplicationFileDTOList(List<ApplicationFileDTO> applicationFileDTOList) {
-        this.applicationFileDTOList = applicationFileDTOList;
+    public void setApplicationFileList(List<ApplicationFileDTO> applicationFileList) {
+        this.applicationFileList = applicationFileList;
     }
 
     public String getFirstName() {
@@ -206,6 +199,14 @@ public class ApplicationDTO {
         this.applicationStatus = applicationStatus;
     }
 
+    public String getFileStorageHashId() {
+        return fileStorageHashId;
+    }
+
+    public void setFileStorageHashId(String fileStorageHashId) {
+        this.fileStorageHashId = fileStorageHashId;
+    }
+
     public String getFileId() {
         return fileId;
     }
@@ -221,4 +222,5 @@ public class ApplicationDTO {
     public void setResultFileId(String resultFileId) {
         this.resultFileId = resultFileId;
     }
+
 }

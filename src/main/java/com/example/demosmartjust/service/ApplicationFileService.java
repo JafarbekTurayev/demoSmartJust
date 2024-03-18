@@ -1,29 +1,22 @@
 package com.example.demosmartjust.service;
 
-import com.example.demosmartjust.dto.ApplicationDTO;
-import com.example.demosmartjust.dto.ApplicationFileDTO;
-import com.example.demosmartjust.entity.ApplicationFile;
-import com.example.demosmartjust.entity.ApplicationFileFilterParam;
-import com.example.demosmartjust.entity.ApplicationFileType;
-import com.example.demosmartjust.entity.ParamUtil;
-import com.example.demosmartjust.feign.FileServiceFeign;
-import com.example.demosmartjust.feign.FileStorageDTO;
-import com.example.demosmartjust.integration.SmartJustIntegrationService;
-import com.example.demosmartjust.integration.SmartJustUploadResponse;
-import com.example.demosmartjust.mapper.ApplicationFileMapper;
-import com.example.demosmartjust.repository.ApplicationFileRepository;
+import com.smartsoft.smartofficebackend.domain.integration.smartJust.ApplicationFile;
+import com.smartsoft.smartofficebackend.domain.integration.smartJust.ApplicationFileFilterParam;
+import com.smartsoft.smartofficebackend.domain.integration.smartJust.ApplicationFileType;
+import com.smartsoft.smartofficebackend.repository.integration.smartJust.ApplicationFileRepository;
+import com.smartsoft.smartofficebackend.service.dto.hr.FileStorageDTO;
+import com.smartsoft.smartofficebackend.service.dto.integration.smartJust.ApplicationDTO;
+import com.smartsoft.smartofficebackend.service.dto.integration.smartJust.ApplicationFileDTO;
+import com.smartsoft.smartofficebackend.service.feign.FileServiceFeign;
+import com.smartsoft.smartofficebackend.service.mapper.ApplicationFileMapper;
+import com.smartsoft.smartofficebackend.service.util.ParamUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -41,19 +34,19 @@ public class ApplicationFileService {
     private final ApplicationFileRepository applicationFileRepository;
 
     private final ApplicationFileMapper applicationFileMapper;
-    private final SmartJustIntegrationService smartJustIntegrationService;
+
     private final FileServiceFeign fileServiceFeign;
 
-    public ApplicationFileService(ApplicationFileRepository applicationFileRepository, ApplicationFileMapper applicationFileMapper, FileServiceFeign fileServiceFeign, SmartJustIntegrationService smartJustIntegrationService) {
+    public ApplicationFileService(ApplicationFileRepository applicationFileRepository, ApplicationFileMapper applicationFileMapper, FileServiceFeign fileServiceFeign) {
         this.applicationFileRepository = applicationFileRepository;
         this.applicationFileMapper = applicationFileMapper;
         this.fileServiceFeign = fileServiceFeign;
-        this.smartJustIntegrationService = smartJustIntegrationService;
     }
+
 
     public ApplicationFileDTO create(ApplicationFileDTO applicationFileDTO) {
         log.debug("Request to save ApplicationFile : {}", applicationFileDTO);
-        applicationFileDTO.setFileType(ApplicationFileType.MAIN.name());
+        applicationFileDTO.setType(ApplicationFileType.MAIN.name());
         ApplicationFile applicationFile = applicationFileMapper.toEntity(applicationFileDTO);
         applicationFile = applicationFileRepository.save(applicationFile);
         return applicationFileMapper.toDto(applicationFile);
@@ -67,18 +60,18 @@ public class ApplicationFileService {
         return applicationFileMapper.toDto(save);
     }
 
-    public Optional<ApplicationFileDTO> partialUpdate(ApplicationFileDTO applicationFileDTO) {
-        log.debug("Request to partially update ApplicationFile : {}", applicationFileDTO);
+    public Optional<ApplicationFileDTO> partialUpdate(ApplicationFileDTO cooperationContractFileDTO) {
+        log.debug("Request to partially update ApplicationFile : {}", cooperationContractFileDTO);
 
         return applicationFileRepository
-                .findById(applicationFileDTO.getId())
-                .map(existingAppFile -> {
-                    applicationFileMapper.partialUpdate(existingAppFile, applicationFileDTO);
+            .findById(cooperationContractFileDTO.getId())
+            .map(existingCoopContractFile -> {
+                applicationFileMapper.partialUpdate(existingCoopContractFile, cooperationContractFileDTO);
 
-                    return existingAppFile;
-                })
-                .map(applicationFileRepository::save)
-                .map(applicationFileMapper::toDto);
+                return existingCoopContractFile;
+            })
+            .map(applicationFileRepository::save)
+            .map(applicationFileMapper::toDto);
     }
 
     @Transactional(readOnly = true)
@@ -121,16 +114,17 @@ public class ApplicationFileService {
         if (applicationDTO.getId() != null) {
             applicationFileRepository.deleteAllByApplicationId(applicationDTO.getId());
             applicationDTO
-                .getApplicationFileDTOList()
-                .forEach(cooperationContractFileDTO -> {
-                    cooperationContractFileDTO.setId(null);
-                    cooperationContractFileDTO.setApplicationId(applicationDTO.getId());
-                    ApplicationFileDTO save = create(cooperationContractFileDTO);
-                    cooperationContractFileDTO.setId(save.getId());
+                .getApplicationFileList()
+                .forEach(applicationFileDTO -> {
+                    applicationFileDTO.setId(null);
+                    applicationFileDTO.setApplicationId(applicationDTO.getId());
+                    ApplicationFileDTO save = create(applicationFileDTO);
+                    applicationFileDTO.setId(save.getId());
                 });
         }
         return applicationDTO;
     }
+
     public List<ApplicationFileDTO> findAllListByApplicationId(Long applicationId) {
         log.debug("Request to get all ApplicationDTO list");
         return applicationFileRepository
@@ -146,8 +140,7 @@ public class ApplicationFileService {
                     applicationFileDTO.setHashId(fileStorageDTO.getHashId());
                 }
                 return applicationFileDTO;
-            })
-            .collect(Collectors.toList());
+            }).collect(Collectors.toList());
     }
 
 }

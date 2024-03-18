@@ -1,7 +1,8 @@
 package com.example.demosmartjust.dto;
 
-import jakarta.validation.constraints.NotNull;
 
+
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -24,24 +25,9 @@ public class ApplicationFileDTO implements Serializable {
     private String extension;
 
     private String hashId;
+
     private String smartJustFileId;
-    private String fileType;
-
-    public String getFileType() {
-        return fileType;
-    }
-
-    public void setFileType(String fileType) {
-        this.fileType = fileType;
-    }
-
-    public String getSmartJustFileId() {
-        return smartJustFileId;
-    }
-
-    public void setSmartJustFileId(String smartJustFileId) {
-        this.smartJustFileId = smartJustFileId;
-    }
+    private String type;
 
     public Long getId() {
         return id;
@@ -97,6 +83,22 @@ public class ApplicationFileDTO implements Serializable {
 
     public void setHashId(String hashId) {
         this.hashId = hashId;
+    }
+
+    public String getSmartJustFileId() {
+        return smartJustFileId;
+    }
+
+    public void setSmartJustFileId(String smartJustFileId) {
+        this.smartJustFileId = smartJustFileId;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 
     @Override
