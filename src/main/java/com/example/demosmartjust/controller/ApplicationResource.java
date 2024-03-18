@@ -1,6 +1,7 @@
 package com.example.demosmartjust.controller;
 
 
+import com.example.demosmartjust.dto.ApplicationDTO;
 import com.smartsoft.smartofficebackend.domain.integration.smartJust.ApplicationFilterParam;
 import com.smartsoft.smartofficebackend.repository.integration.smartJust.ApplicationRepository;
 import com.smartsoft.smartofficebackend.service.dto.integration.smartJust.ApplicationDTO;
@@ -119,6 +120,21 @@ public class ApplicationResource {
         );
     }
 
+    @PostMapping("/application/width-resolution")
+    public ResponseEntity<DocWidthResolution> createDocWidthResolution(@Valid @RequestBody ApplicationDTO applicationDTO)
+            throws URISyntaxException {
+        log.debug("REST request to save Resolution : {}", applicationDTO);
+        //TODO DocWidthResolution classni hosil qilib olish kerak do oborotga tushirish un
+
+        if (resolutionWidthDoc.getDocDTO().getId() != null) {
+            throw new BadRequestAlertException("A new resolutions-width-doc cannot already have an ID", ENTITY_NAME, "idexists");
+        }
+        DocWidthResolution result = docService.createDocWidthResolution(resolutionWidthDoc);
+        return ResponseEntity
+                .created(new URI("/api/resolutions/" + result.getResolutionDTO().getId()))
+                .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getResolutionDTO().getId().toString()))
+                .body(result);
+    }
 
     @GetMapping("/application/all-list")
     public ResponseEntity<List<ApplicationDTO>> getAllApps(@ParameterObject Pageable pageable) {
@@ -141,6 +157,13 @@ public class ApplicationResource {
         log.debug("REST request to get App : {}", id);
         Optional<ApplicationDTO> applicationDTO = applicationService.findOne(id);
         return ResponseUtil.wrapOrNotFound(applicationDTO);
+    }
+
+    @PostMapping("/application/confirm")
+    public ResponseEntity<ApplicationDTO> appConfirm(@PathVariable(value = "id", required = false) final Long id,
+                                                     @NotNull @RequestBody ApplicationDTO applicationDTO){
+        log.debug("REST request to post App confirm : {}", id);
+        applicationService.
     }
 
 }

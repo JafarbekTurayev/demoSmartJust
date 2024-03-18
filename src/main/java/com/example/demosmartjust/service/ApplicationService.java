@@ -1,6 +1,16 @@
 package com.example.demosmartjust.service;
 
 
+import com.example.demosmartjust.dto.ApplicationConfirmRequestDTO;
+import com.example.demosmartjust.dto.ApplicationDTO;
+import com.example.demosmartjust.dto.ApplicationFileDTO;
+import com.example.demosmartjust.entity.ApplicationFileType;
+import com.example.demosmartjust.entity.ApplicationStatus;
+import com.example.demosmartjust.feign.FileStorageDTO;
+import com.example.demosmartjust.integration.SmartJustIntegrationService;
+import com.example.demosmartjust.integration.SmartJustUploadResponse;
+import com.example.demosmartjust.integration.confirm.SmartJustConfirmRequest;
+import com.example.demosmartjust.integration.confirm.SmartJustConfirmResponse;
 import com.smartsoft.smartofficebackend.domain.integration.smartJust.Application;
 import com.smartsoft.smartofficebackend.domain.integration.smartJust.ApplicationFilterParam;
 import com.smartsoft.smartofficebackend.repository.integration.smartJust.ApplicationRepository;
@@ -12,11 +22,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpMethod;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -27,20 +44,26 @@ public class ApplicationService {
     private final ApplicationMapper applicationMapper;
     private final ApplicationRepository applicationRepository;
     private final ApplicationFileService applicationFileService;
+    private final SmartJustIntegrationService smartJustIntegrationService;
 
-    public ApplicationService(ApplicationMapper applicationMapper, ApplicationRepository applicationRepository,ApplicationFileService applicationFileService) {
+    public ApplicationService(ApplicationMapper applicationMapper, ApplicationRepository applicationRepository, ApplicationFileService applicationFileService, SmartJustIntegrationService smartJustIntegrationService) {
         this.applicationMapper = applicationMapper;
         this.applicationRepository = applicationRepository;
         this.applicationFileService = applicationFileService;
+        this.smartJustIntegrationService = smartJustIntegrationService;
     }
 
     public ApplicationDTO create(ApplicationDTO applicationDTO) {
         log.debug("Request to save App : {}", applicationDTO);
         Application save = applicationRepository.save(applicationMapper.toEntity(applicationDTO));
 
-        if (applicationDTO.getFileStorageHashId()!=null){
-            applicationFileService.create(applicationDTO.getApplicationFileList().get(0));
-            //TODO aapfileniyam save qilamiz shu yerda
+        if (!applicationDTO.getApplicationFileList().isEmpty()) {
+            for (ApplicationFileDTO fileDTO : applicationDTO.getApplicationFileList()) {
+                fileDTO.setApplicationId(save.getId());
+                applicationFileService.create(fileDTO);
+            }
+        } else {
+            //TODO shu yerda fayl generatsiya qilish kerak
         }
 
         return applicationMapper.toDto(save);
@@ -103,4 +126,104 @@ public class ApplicationService {
                     return applicationDTO;
                 });
     }
+
+    @Transactional
+    public ApplicationDTO confirm(Long id, ApplicationConfirmRequestDTO confirmRequest) {
+        ApplicationDTO resAppDTO = null;
+        if (!confirmRequest.getApplicationFileDTOList().isEmpty()) {
+            for (ApplicationFileDTO applicationFileDTO : confirmRequest.getApplicationFileDTOList()) {
+                FileStorageDTO fileStorageDTO = fileServiceFeign.getOneByHashWithByte(applicationFileDTO.getFileStorageHashId());
+                if (fileStorageDTO != null) {
+                    try {
+                        SmartJustUploadResponse uploadResponse = smartJustIntegrationService.uploadResultFile(convertToFile(fileStorageDTO));
+
+                        applicationFileDTO.setType(ApplicationFileType.CONFIRM.name());
+                        applicationFileDTO.setSmartJustFileId(String.valueOf(uploadResponse.getData().getId()));
+                        applicationFileService.partialUpdate(applicationFileDTO);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
+        }
+
+        SmartJustConfirmRequest smartJustConfirmRequest = new SmartJustConfirmRequest();
+        smartJustConfirmRequest.setMessage(confirmRequest.getMessage());
+        if (confirmRequest.getStatus().equals(ApplicationStatus.ACCEPTED.name())) {
+            smartJustConfirmRequest.setStatus("CONFIRM");
+        } else {
+            smartJustConfirmRequest.setStatus("REJECTED");
+        }
+        smartJustConfirmRequest.setFileId(confirmRequest.getFileId());
+
+        SmartJustConfirmResponse confirmResponse = smartJustIntegrationService.applicationConfirm(id, smartJustConfirmRequest);
+
+        if (Objects.requireNonNull(confirmResponse).getStatus() == 0 && confirmResponse.getData() != null) {
+            Optional<ApplicationDTO> dtoOptional = findOne(id);
+            if (dtoOptional.isPresent()) {
+                ApplicationDTO applicationDTO = dtoOptional.get();
+                if (confirmResponse.getData().getApplicationStatus().equals("CONFIRM")) {
+                    applicationDTO.setApplicationStatus(ApplicationStatus.ACCEPTED.name());
+                } else {
+                    applicationDTO.setApplicationStatus(ApplicationStatus.CANCELLED.name());
+                }
+                Optional<ApplicationDTO> optionalApplicationDTO = partialUpdate(applicationDTO);
+                resAppDTO = optionalApplicationDTO.get();
+            }
+        }
+        return resAppDTO;
+    }
+
+    @Transactional
+    public ApplicationDTO close(Long id, ApplicationConfirmRequestDTO confirmRequest) {
+        ApplicationDTO resAppDTO = null;
+
+        if (!confirmRequest.getApplicationFileDTOList().isEmpty()) {
+            for (ApplicationFileDTO applicationFileDTO : confirmRequest.getApplicationFileDTOList()) {
+                FileStorageDTO fileStorageDTO = fileServiceFeign.getOneByHashWithByte(applicationFileDTO.getFileStorageHashId());
+                if (fileStorageDTO != null) {
+                    try {
+                        SmartJustUploadResponse uploadResponse = smartJustIntegrationService.uploadResultFile(convertToFile(fileStorageDTO));
+
+                        applicationFileDTO.setType(ApplicationFileType.CLOSE.name());
+                        applicationFileDTO.setSmartJustFileId(String.valueOf(uploadResponse.getData().getId()));
+                        applicationFileService.partialUpdate(applicationFileDTO);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
+        }
+        SmartJustConfirmRequest smartJustConfirmRequest = new SmartJustConfirmRequest();
+        smartJustConfirmRequest.setMessage(confirmRequest.getMessage());
+        smartJustConfirmRequest.setStatus(confirmRequest.getStatus());
+        smartJustConfirmRequest.setFileId(confirmRequest.getFileId());
+
+        //integratisiyani chaqiramiz
+        SmartJustConfirmResponse closeResponse = smartJustIntegrationService.applicationClose(id, smartJustConfirmRequest);
+
+        if (Objects.requireNonNull(closeResponse).getStatus() == 0 && closeResponse.getData() != null) {
+            Optional<ApplicationDTO> dtoOptional = findOne(id);
+            if (dtoOptional.isPresent()) {
+                ApplicationDTO applicationDTO = dtoOptional.get();
+                applicationDTO.setApplicationStatus(closeResponse.getData().getApplicationStatus());
+                Optional<ApplicationDTO> optionalApplicationDTO = partialUpdate(applicationDTO);
+                resAppDTO = optionalApplicationDTO.get();
+            }
+        }
+        return resAppDTO;
+    }
+
+    private MultipartFile convertToFile(FileStorageDTO fileStorageDTO) throws IOException {
+        InputStream inputStream = new ByteArrayInputStream(fileStorageDTO.getBytes());
+        MockMultipartFile multipartFile = new MockMultipartFile(
+                fileStorageDTO.getName(),
+                fileStorageDTO.getName(),
+                fileStorageDTO.getContentType(),
+                inputStream
+        );
+
+        return multipartFile;
+    }
+
 }

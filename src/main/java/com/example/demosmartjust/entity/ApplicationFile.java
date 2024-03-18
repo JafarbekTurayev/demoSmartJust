@@ -15,7 +15,7 @@ import jakarta.validation.constraints.NotNull;
 import java.io.Serializable;
 
 /**
- * A CooperationContractFile.
+ * A ApplicationFile.
  */
 @Entity
 @Table(name = "application_file")

@@ -67,7 +67,7 @@ public class ApplicationFileResource {
         }
         ApplicationFileDTO result = applicationFileService.create(applicationFileDTO);
         return ResponseEntity
-                .created(new URI("/api/cooperation-files/" + result.getId()))
+                .created(new URI("/api/application-files/" + result.getId()))
                 .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
                 .body(result);
     }

@@ -2,12 +2,23 @@ package com.example.demosmartjust.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.List;
+
 public class ApplicationConfirmRequestDTO {
     private String fileStorageHashId;
+    private List<ApplicationFileDTO> applicationFileDTOList;
     private String status;
     @JsonProperty("file_id")
     private int fileId;
     private String message;
+
+    public List<ApplicationFileDTO> getApplicationFileDTOList() {
+        return applicationFileDTOList;
+    }
+
+    public void setApplicationFileDTOList(List<ApplicationFileDTO> applicationFileDTOList) {
+        this.applicationFileDTOList = applicationFileDTOList;
+    }
 
     public String getFileStorageHashId() {
         return fileStorageHashId;

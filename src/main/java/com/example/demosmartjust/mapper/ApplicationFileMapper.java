@@ -22,9 +22,9 @@ public interface ApplicationFileMapper extends EntityMapper<ApplicationFileDTO, 
         if (id == null) {
             return null;
         }
-        ApplicationFile cooperationContractFile = new ApplicationFile();
-        cooperationContractFile.setId(id);
-        return cooperationContractFile;
+        ApplicationFile applicationFile = new ApplicationFile();
+        applicationFile.setId(id);
+        return applicationFile;
     }
 
 }

@@ -1,16 +1,8 @@
 package com.example.demosmartjust.integration;
 
-import com.example.demosmartjust.dto.ApplicationConfirmRequestDTO;
-import com.example.demosmartjust.integration.application.ResultResponse;
-import com.example.demosmartjust.integration.application.SmartJustPageableRequest;
 import com.example.demosmartjust.integration.auth.AuthToken;
-import com.example.demosmartjust.integration.confirm.SmartJustConfirmRequest;
-import com.example.demosmartjust.integration.confirm.SmartJustConfirmResponse;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
@@ -30,24 +22,6 @@ public class SmartJustIntegrationResource {
     @PostMapping("/get-token")
     public ResponseEntity getToken() {
         AuthToken result = smartJustIntegrationService.getToken();
-        return ResponseEntity.ok(result);
-    }
-
-//    @PostMapping("/app-list")
-//    public ResponseEntity appList( @RequestBody SmartJustPageableRequest request) {
-//        ResultResponse result = smartJustIntegrationService.getApplicationList(request);
-//        return ResponseEntity.ok(result);
-//    }
-
-    @PutMapping("/confirm/{id}")
-    public ResponseEntity confirm(@PathVariable Long id, @RequestBody ApplicationConfirmRequestDTO confirmRequest) {
-        SmartJustConfirmResponse result = smartJustIntegrationService.applicationConfirm(id, confirmRequest);
-        return ResponseEntity.ok(result);
-    }
-
-    @PutMapping("/close/{id}")
-    public ResponseEntity close(@PathVariable Long id, @RequestBody ApplicationConfirmRequestDTO confirmRequest) {
-        SmartJustConfirmResponse result = smartJustIntegrationService.applicationClose(id, confirmRequest);
         return ResponseEntity.ok(result);
     }
 

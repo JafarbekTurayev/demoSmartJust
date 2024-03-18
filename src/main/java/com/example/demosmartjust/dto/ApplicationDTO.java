@@ -30,8 +30,9 @@ public class ApplicationDTO {
     private SmartJustName address;
     private String description;
     private String email;
-    @JsonFormat(pattern = "dd.MM.yyyy HH:mm:ss")
+    @JsonFormat(pattern = "dd.MM.yyyy")
     private Date admissionDate;
+    @JsonFormat(pattern = "HH:mm")
     private LocalTime admissionTime;
     private String applicationStatus;
     private String fileId;

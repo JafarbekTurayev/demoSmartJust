@@ -55,18 +55,18 @@ public class ApplicationFileService {
 
     public ApplicationFileDTO update(ApplicationFileDTO applicationFileDTO) {
         log.debug("Request to save ApplicationFile : {}", applicationFileDTO);
-        ApplicationFile cooperationContractFile = applicationFileMapper.toEntity(applicationFileDTO);
-        ApplicationFile save = applicationFileRepository.save(cooperationContractFile);
+        ApplicationFile applicationFile = applicationFileMapper.toEntity(applicationFileDTO);
+        ApplicationFile save = applicationFileRepository.save(applicationFile);
         return applicationFileMapper.toDto(save);
     }
 
-    public Optional<ApplicationFileDTO> partialUpdate(ApplicationFileDTO cooperationContractFileDTO) {
-        log.debug("Request to partially update ApplicationFile : {}", cooperationContractFileDTO);
+    public Optional<ApplicationFileDTO> partialUpdate(ApplicationFileDTO applicationFileDTO) {
+        log.debug("Request to partially update ApplicationFile : {}", applicationFileDTO);
 
         return applicationFileRepository
-            .findById(cooperationContractFileDTO.getId())
+            .findById(applicationFileDTO.getId())
             .map(existingCoopContractFile -> {
-                applicationFileMapper.partialUpdate(existingCoopContractFile, cooperationContractFileDTO);
+                applicationFileMapper.partialUpdate(existingCoopContractFile, applicationFileDTO);
 
                 return existingCoopContractFile;
             })
